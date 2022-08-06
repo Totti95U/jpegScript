@@ -1,0 +1,9 @@
+@jpeg Compressor
+--track0:•i¿,0,100,50
+--track1:‰ñ”,1,10,1,1
+--check0:“§–¾“x‚àˆ³k‚·‚é,0
+
+require("jpegComp")
+local data, w, h = obj.getpixeldata()
+jpegComp.jpegComp(data, w, h, obj.track0, obj.check0)
+obj.putpixeldata(data)
