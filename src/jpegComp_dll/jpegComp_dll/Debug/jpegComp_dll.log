@@ -1,0 +1,4 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(499,5): warning MSB8004: Output ディレクトリの末尾がスラッシュではありません。Output ディレクトリが適切に評価されるようにするために、このビルド インスタンスによってスラッシュが追加されます。
+  main.cpp
+     ライブラリ ..\..\jpegComp.lib とオブジェクト ..\..\jpegComp.exp を作成中
+  jpegComp_dll.vcxproj -> G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp.dll
