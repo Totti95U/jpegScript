@@ -1,2 +1,0 @@
-# jpegScript
-unchi
