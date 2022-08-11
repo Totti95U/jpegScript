@@ -1,0 +1,24 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(499,5): warning MSB8004: Output ディレクトリの末尾がスラッシュではありません。Output ディレクトリが適切に評価されるようにするために、このビルド インスタンスによってスラッシュが追加されます。
+  main.cpp
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(44,30): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(45,30): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(46,30): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(47,30): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(53,30): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(54,30): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(55,30): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(56,30): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(284,15): warning C4244: '初期化中': 'double' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(294,109): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(295,112): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(313,70): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(314,90): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(315,90): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(389,31): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(390,31): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(391,31): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(412,31): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(413,31): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
+G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp_dll\jpegComp_dll\main.cpp(414,31): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
+     ライブラリ ..\..\jpegComp.lib とオブジェクト ..\..\jpegComp.exp を作成中
+  jpegComp_dll.vcxproj -> G:\ユーザー\ToTTi\Documents\GitHub\jpegScript\src\jpegComp.dll
