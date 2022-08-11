@@ -1,5 +1,6 @@
 #include <lua.hpp>
 #include <vector>
+#include <omp.h>
 using namespace std;
 
 #define min(a, b) ((a < b) ? a : b)
@@ -284,9 +285,6 @@ int jpegComp(lua_State* L) {
     int max_f = static_cast<double>(lua_tointeger(L, 5));
     bool comp_alpha = static_cast<bool>(lua_toboolean(L, 6));
 
-    std::vector<intPixel_YUVA> int_pixels(8 * 8);
-    std::vector<intPixel_YUVA> int_freqs(8 * 8);
-
     // 量子化行列の設定
     int S_Y[64], S_UV[64];
     for (int i = 0; i < max_f; i++) {
@@ -296,8 +294,11 @@ int jpegComp(lua_State* L) {
     }
 
     // 画像全体を 8x8 のブロックに分割して処理
+    #pragma omp parallel for
     for (int y0 = 0; y0 < h; y0 += 8) {
         for (int x0 = 0; x0 < w; x0 += 8) {
+            std::vector<intPixel_YUVA> int_pixels(8 * 8);
+            std::vector<intPixel_YUVA> int_freqs(8 * 8);
 
             // pixels (unsigned char RGB) -> int_pixels (YUV) に変換
             for (int dy = 0; dy < 8; dy++) {
