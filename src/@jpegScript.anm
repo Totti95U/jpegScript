@@ -1,9 +1,29 @@
 @jpeg Compressor
 --track0:品質,0,99,50
---track1:回数,1,10,1,1
+
+--track1:インタレース,1,64,64,1
+
 --check0:透明度も圧縮する,0
 
 require("jpegComp")
+local tmp_w, tmp_h = obj.getpixel()
+local w_mod8 = tmp_w % 8
+local h_mod8 = tmp_h % 8
+
+if w_mod8 % 8 > 0 then
+    obj.effect("領域拡張", "右", 8 - w_mod8, "塗りつぶし", 1)
+end
+if h_mod8 % 8 > 0 then
+    obj.effect("領域拡張", "下", 8 - h_mod8, "塗りつぶし", 1)
+end
+
 local data, w, h = obj.getpixeldata()
-jpegComp.jpegComp(data, w, h, obj.track0, obj.check0)
+jpegComp.jpegComp(data, w, h, obj.track0, obj.track1, obj.check0)
 obj.putpixeldata(data)
+
+if h_mod8 > 0 then
+    obj.effect("クリッピング", "下", 8 - h_mod8)
+end
+if w_mod8 > 0 then
+    obj.effect("クリッピング", "右", 8 - w_mod8)
+end

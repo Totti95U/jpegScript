@@ -82,6 +82,15 @@ const int Q_UV[64] = { 17, 18, 24, 47, 99, 99, 99, 99,
                        99, 99, 99, 99, 99, 99, 99, 99,
                        99, 99, 99, 99, 99, 99, 99, 99 };
 
+const int ZigZag[64] = { 0,  1,  8, 16,  9,  2,  3, 10,
+                        17, 24, 32, 25, 18, 11,  4,  5,
+                        12, 19, 26, 33, 40, 48, 41, 34,
+                        27, 20, 13,  6,  7, 14, 21, 28,
+                        35, 42, 49, 56, 57, 50, 43, 36,
+                        29, 22, 15, 23, 30, 37, 44, 51,
+                        58, 59, 52, 45, 38, 31, 39, 46,
+                        53, 60, 61, 54, 47, 55, 62, 63 };
+
 std::vector<intPixel_YUVA> xFDCT2(std::vector<intPixel_YUVA> pixels) {
     std::vector<intPixel_YUVA> freqs(2);
 
@@ -139,18 +148,18 @@ std::vector<intPixel_YUVA> xFDCT8(std::vector<intPixel_YUVA> pixels, int i) {
     return freqs;
 }
 
-std::vector<intPixel_YUVA> yFDCT8(std::vector<intPixel_YUVA> pixels, int i, int w) {
+std::vector<intPixel_YUVA> yFDCT8(std::vector<intPixel_YUVA> pixels, int i) {
     std::vector<intPixel_YUVA> freqs(8), g(4), h(4), G(4), H(4);
 
-    g[0] = pixels[i] + pixels[i + 7 * w];
-    g[1] = pixels[i + 1 * w] + pixels[i + 6 * w];
-    g[2] = pixels[i + 2 * w] + pixels[i + 5 * w];
-    g[3] = pixels[i + 3 * w] + pixels[i + 4 * w];
+    g[0] = pixels[i] + pixels[i + 7 * 8];
+    g[1] = pixels[i + 1 * 8] + pixels[i + 6 * 8];
+    g[2] = pixels[i + 2 * 8] + pixels[i + 5 * 8];
+    g[3] = pixels[i + 3 * 8] + pixels[i + 4 * 8];
 
-    h[0] = (pixels[i] - pixels[i + 7 * w]) * C16[0];
-    h[1] = (pixels[i + 1 * w] - pixels[i + 6 * w]) * C16[1];
-    h[2] = (pixels[i + 2 * w] - pixels[i + 5 * w]) * C16[2];
-    h[3] = (pixels[i + 3 * w] - pixels[i + 4 * w]) * C16[3];
+    h[0] = (pixels[i] - pixels[i + 7 * 8]) * C16[0];
+    h[1] = (pixels[i + 1 * 8] - pixels[i + 6 * 8]) * C16[1];
+    h[2] = (pixels[i + 2 * 8] - pixels[i + 5 * 8]) * C16[2];
+    h[3] = (pixels[i + 3 * 8] - pixels[i + 4 * 8]) * C16[3];
 
     G = xFDCT4(g);
     H = xFDCT4(h);
@@ -232,18 +241,18 @@ std::vector<intPixel_YUVA> xIDCT8(std::vector<intPixel_YUVA> freqs, int i) {
     return pixels;
 }
 
-std::vector<intPixel_YUVA> yIDCT8(std::vector<intPixel_YUVA> freqs, int i, int w) {
+std::vector<intPixel_YUVA> yIDCT8(std::vector<intPixel_YUVA> freqs, int i) {
     std::vector<intPixel_YUVA> pixels(8), g(4), h(4), G(4), H(4);
 
     G[0] = freqs[i];
-    G[1] = freqs[i + w * 2];
-    G[2] = freqs[i + w * 4];
-    G[3] = freqs[i + w * 6];
+    G[1] = freqs[i + 8 * 2];
+    G[2] = freqs[i + 8 * 4];
+    G[3] = freqs[i + 8 * 6];
 
-    H[0] = freqs[i + w] * 2;
-    H[1] = freqs[i + w * 3] + freqs[i + w];
-    H[2] = freqs[i + w * 5] + freqs[i + w * 3];
-    H[3] = freqs[i + w * 7] + freqs[i + w * 5];
+    H[0] = freqs[i + 8] * 2;
+    H[1] = freqs[i + 8 * 3] + freqs[i + 8];
+    H[2] = freqs[i + 8 * 5] + freqs[i + 8 * 3];
+    H[3] = freqs[i + 8 * 7] + freqs[i + 8 * 5];
 
     g = xIDCT4(G);
     h = xIDCT4(H);
@@ -268,67 +277,51 @@ std::vector<intPixel_YUVA> yIDCT8(std::vector<intPixel_YUVA> freqs, int i, int w
 
 int jpegComp(lua_State* L) {
     Pixel_RGBA* pixels = reinterpret_cast<Pixel_RGBA*>(lua_touserdata(L, 1));
+    // Lua 側で padding 済を前提
     int w = static_cast<int>(lua_tointeger(L, 2));
     int h = static_cast<int>(lua_tointeger(L, 3));
     double q = static_cast<double>(lua_tonumber(L, 4));
-    bool comp_alpha = static_cast<bool>(lua_toboolean(L, 5));
+    int max_f = static_cast<double>(lua_tointeger(L, 5));
+    bool comp_alpha = static_cast<bool>(lua_toboolean(L, 6));
 
-    int padded_w = (w % 8 == 0) ? w : w + 8 - (w % 8);
-    int padded_h = (h % 8 == 0) ? h : h + 8 - (h % 8);
-
-    std::vector<intPixel_YUVA> int_pixels(padded_w * padded_h);
+    std::vector<intPixel_YUVA> int_pixels(8 * 8);
     std::vector<intPixel_YUVA> int_freqs(8 * 8);
-
-    // pixels (unchar RGB) -> int_pixels (YUV) に変換
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            int index = x + w * y;
-            int pindex = x + padded_w * y;
-
-            int b = pixels[index].b;
-            int g = pixels[index].g;
-            int r = pixels[index].r;
-
-            // ダウンサンプリングも並行
-            int_pixels[pindex].y =   0.299F * r + 0.587F * g + 0.114F * b;
-            int_pixels[pindex].u = ( 0.500F * r - 0.419F * g - 0.081F * b + 128) / 2;
-            int_pixels[pindex].v = (-0.169F * r - 0.332F * g + 0.500F * b + 128) / 2;
-            int_pixels[pindex].a = static_cast<int>(pixels[index].a);
-        }
-    }
-
-    // padding
-    for (int y = 0; y < h; y++) {
-        for (int x = w; x < padded_w; x++) {
-            int index = x + padded_w * y;
-            int_pixels[index] = int_pixels[w * (y + 1) - 1];
-        }
-    }
-
-    for (int y = h; y < padded_h; y++) {
-        for (int x = 0; x < padded_w; x++) {
-            int index = x + padded_w * y;
-            int_pixels[index] = int_pixels[x + w * (h - 1)];
-        }
-    }
 
     // 量子化行列の設定
     int S_Y[64], S_UV[64];
-    for (int i = 0; i < 64; i++) {
-        S_Y[i] = 0.02 * (1 - static_cast<double>(Q_Y[i])) * q + 2 * static_cast<double>(Q_Y[i]) - 1;
-        S_UV[i] = 0.02 * (1 - static_cast<double>(Q_UV[i])) * q + 2 * static_cast<double>(Q_UV[i]) - 1;
+    for (int i = 0; i < max_f; i++) {
+        int index = ZigZag[i];
+        S_Y[index] = 0.02 * (1 - static_cast<double>(Q_Y[index])) * q + 2 * static_cast<double>(Q_Y[index]) - 1;
+        S_UV[index] = 0.02 * (1 - static_cast<double>(Q_UV[index])) * q + 2 * static_cast<double>(Q_UV[index]) - 1;
     }
 
-    // FDCT, 量子化, 逆量子化, IDCT
+    // 画像全体を 8x8 のブロックに分割して処理
     for (int y0 = 0; y0 < h; y0 += 8) {
         for (int x0 = 0; x0 < w; x0 += 8) {
-            int index = x0 + padded_w * y0;
+
+            // pixels (unsigned char RGB) -> int_pixels (YUV) に変換
+            for (int dy = 0; dy < 8; dy++) {
+                for (int dx = 0; dx < 8; dx++) {
+                    int index = x0 + dx + w * (y0 + dy);
+                    int pindex = dx + 8 * dy;
+
+                    int b = pixels[index].b;
+                    int g = pixels[index].g;
+                    int r = pixels[index].r;
+
+                    // ダウンサンプリングも並行
+                    int_pixels[pindex].y =   0.299F * r + 0.587F * g + 0.114F * b;
+                    int_pixels[pindex].u =  (0.500F * r - 0.419F * g - 0.081F * b + 128) / 2;
+                    int_pixels[pindex].v = (-0.169F * r - 0.332F * g + 0.500F * b + 128) / 2;
+                    int_pixels[pindex].a = static_cast<int>(pixels[index].a);
+                }
+            }
 
             // FDCT
             // y 軸に平行な FDCT
             for (int dx = 0; dx < 8; dx++) {
                 std::vector<intPixel_YUVA> yfreqs(8);
-                yfreqs = yFDCT8(int_pixels, index + dx, padded_w);
+                yfreqs = yFDCT8(int_pixels, dx);
                 for (int dy = 0; dy < 8; dy++) {
                     int_freqs[dx + 8 * dy] = yfreqs[dy];
                 }
@@ -343,16 +336,21 @@ int jpegComp(lua_State* L) {
             }
 
             // 量子化, 逆量子化
-            for (int i = 0; i < 64; i++) {
-                int_freqs[i].v /= S_UV[i];
-                int_freqs[i].u /= S_UV[i];
-                int_freqs[i].y /= S_Y[i];
-                int_freqs[i].a /= S_Y[i];
+            for (int i = 0; i < max_f; i++) {
+                int index = ZigZag[i];
+                int_freqs[index].v /= S_UV[index];
+                int_freqs[index].u /= S_UV[index];
+                int_freqs[index].y /= S_Y[index];
+                int_freqs[index].a /= S_Y[index];
 
-                int_freqs[i].v *= S_UV[i];
-                int_freqs[i].u *= S_UV[i];
-                int_freqs[i].y *= S_Y[i];
-                int_freqs[i].a *= S_Y[i];
+                int_freqs[index].v *= S_UV[index];
+                int_freqs[index].u *= S_UV[index];
+                int_freqs[index].y *= S_Y[index];
+                int_freqs[index].a *= S_Y[index];
+            }
+            for (int i = max_f; i < 64; i++) {
+                int index = ZigZag[i];
+                int_freqs[index] = intPixel_YUVA({ 0, 0, 0, 0 });
             }
 
 
@@ -360,7 +358,7 @@ int jpegComp(lua_State* L) {
             // x 軸に平行な IDCT
             for (int dx = 0; dx < 8; dx++) {
                 std::vector<intPixel_YUVA> ypixels(8);
-                ypixels = yIDCT8(int_freqs, dx, 8);
+                ypixels = yIDCT8(int_freqs, dx);
                 for (int dy = 0; dy < 8; dy++) {
                     int_freqs[dx + 8 * dy] = ypixels[dy];
                 }
@@ -371,58 +369,55 @@ int jpegComp(lua_State* L) {
                 std::vector<intPixel_YUVA> xpixels(8);
                 xpixels = xIDCT8(int_freqs, 8 * dy);
                 for (int dx = 0; dx < 8; dx++) {
-                    int_pixels[index + dx + padded_w * dy] = xpixels[dx];
+                    int_pixels[dx + 8 * dy] = xpixels[dx];
                 }
             }
 
-        }
-    }
+            // int_pixels (YUV) -> pixels (uchar RGB) に変換
+            if (comp_alpha) {
+                // 透明度も圧縮する
+                for (int dy = 0; dy < 8; dy++) {
+                    for (int dx = 0; dx < 8; dx++) {
+                        int index = x0 + dx + w * (y0 + dy);
+                        int pindex = dx + 8 * dy;
 
-    // int_pixels (YUV) -> pixels (uchar RGB) に変換
-    if (comp_alpha) {
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                int index = x + w * y;
-                int pindex = x + padded_w * y;
+                        // オーバーサンプリングも並行
+                        int v = 2 * int_pixels[pindex].v - 128;
+                        int u = 2 * int_pixels[pindex].u - 128;
+                        int y = int_pixels[pindex].y;
 
-                // オーバーサンプリングも並行
-                int v = 2 * int_pixels[pindex].v - 128;
-                int u = 2 * int_pixels[pindex].u - 128;
-                int y = int_pixels[pindex].y;
+                        int r = clip(y + 1.402F * u, 0, 255);
+                        int g = clip(y - 0.714F * u - 0.344F * v, 0, 255);
+                        int b = clip(y + 1.772F * v, 0, 255);
 
-                int r = clip(y + 1.402F * u, 0, 255);
-                int g = clip(y - 0.714F * u - 0.344F * v, 0, 255);
-                int b = clip(y + 1.772F * v, 0, 255);
-
-                pixels[index].r = static_cast<unsigned char>(r);
-                pixels[index].g = static_cast<unsigned char>(g);
-                pixels[index].b = static_cast<unsigned char>(b);
-
-                pixels[index].r = static_cast<unsigned char>(r);
-                pixels[index].g = static_cast<unsigned char>(g);
-                pixels[index].b = static_cast<unsigned char>(b);
-                pixels[index].a = static_cast<unsigned char>(clip(int_pixels[pindex].a, 0, 255));
+                        pixels[index].r = static_cast<unsigned char>(r);
+                        pixels[index].g = static_cast<unsigned char>(g);
+                        pixels[index].b = static_cast<unsigned char>(b);
+                        pixels[index].a = static_cast<unsigned char>(clip(int_pixels[pindex].a, 0, 255));
+                    }
+                }
             }
-        }
-    }
-    else {
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                int index = x + w * y;
-                int pindex = x + padded_w * y;
+            else {
+                // 透明度は圧縮しない
+                for (int dy = 0; dy < 8; dy++) {
+                    for (int dx = 0; dx < 8; dx++) {
+                        int index = x0 + dx + w * (y0 + dy);
+                        int pindex = dx + 8 * dy;
 
-                // オーバーサンプリングも並行
-                int v = 2 * int_pixels[pindex].v - 128;
-                int u = 2 * int_pixels[pindex].u - 128;
-                int y = int_pixels[pindex].y;
+                        // オーバーサンプリングも並行
+                        int v = 2 * int_pixels[pindex].v - 128;
+                        int u = 2 * int_pixels[pindex].u - 128;
+                        int y = int_pixels[pindex].y;
 
-                int r = clip(y + 1.402F * u, 0, 255);
-                int g = clip(y - 0.714F * u - 0.344F * v, 0, 255);
-                int b = clip(y + 1.772F * v, 0, 255);
+                        int r = clip(y + 1.402F * u, 0, 255);
+                        int g = clip(y - 0.714F * u - 0.344F * v, 0, 255);
+                        int b = clip(y + 1.772F * v, 0, 255);
 
-                pixels[index].r = static_cast<unsigned char>(r);
-                pixels[index].g = static_cast<unsigned char>(g);
-                pixels[index].b = static_cast<unsigned char>(b);
+                        pixels[index].r = static_cast<unsigned char>(r);
+                        pixels[index].g = static_cast<unsigned char>(g);
+                        pixels[index].b = static_cast<unsigned char>(b);
+                    }
+                }
             }
         }
     }
